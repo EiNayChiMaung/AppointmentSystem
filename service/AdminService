@@ -1,0 +1,53 @@
+package com.cityStar.service;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
+import com.cityStar.model.Admin;
+import com.cityStar.repository.AdminRepository;
+
+@Service
+public class AdminService {
+	
+	@Autowired
+	private AdminRepository adminRep;	
+	@Autowired
+    private BCryptPasswordEncoder passwordEncoder;
+
+    public void signupAdmin(String name, String email, String password ,String phoneNumber) {
+        Admin existingAdmin = adminRep.findByEmail(email);
+        if (existingAdmin != null) {
+            throw new IllegalArgumentException("Admin with this email already exists.");
+        }
+        String hashedPassword = passwordEncoder.encode(password);
+        Admin newAdmin = new Admin(name, email, hashedPassword, phoneNumber);
+        adminRep.save(newAdmin);
+    }
+
+    public Admin authenticateAdmin(String email, String password) {
+        Admin admin = adminRep.findByEmail(email);
+        if (admin != null && passwordEncoder.matches(password, admin.getPassword())) {
+            return admin;
+        }
+        return null;
+    }
+
+	public void save(Admin existingAdmin) {
+		adminRep.save(existingAdmin);
+	}
+
+	public Admin findByEmail(String email) {
+		return adminRep.findByEmail(email);
+	}
+
+	public Admin updateProfile(Admin admin) {
+		Admin existingAdmin=adminRep.findById(admin.getAdminId()).get();
+		if(existingAdmin!= null) {
+			existingAdmin.setName(admin.getName());
+			existingAdmin.setEmail(admin.getEmail());
+			existingAdmin.setPhoneNumber(admin.getPhoneNumber());
+			adminRep.save(existingAdmin);		
+			return existingAdmin;
+		}
+		return null;
+	}	
+}
