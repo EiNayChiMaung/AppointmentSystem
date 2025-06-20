@@ -1,0 +1,9 @@
+package com.cityStar.model;
+
+public enum AppointmentStatus {
+
+	 REQUESTED,
+	 VERIFIED, 
+	 CONFIRMED,
+	 REJECTED, 
+}
