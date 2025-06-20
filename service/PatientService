@@ -1,0 +1,55 @@
+package com.cityStar.service;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import com.cityStar.model.Patient;
+import com.cityStar.repository.PatientRepository;
+
+@Service
+public class PatientService {
+
+	@Autowired
+	private PatientRepository patientRep;
+	@Autowired
+    private BCryptPasswordEncoder passwordEncoder;
+	
+	public String registerPatient(Patient patient) {
+		if (patientRep.findByEmail(patient.getEmail()) !=null) {
+			 return "Email already exists";
+		}
+		patient.setPassword(passwordEncoder.encode(patient.getPassword()));
+		patientRep.save(patient);
+		return null;
+	}
+
+	public Patient loginPatient(String email, String password) {
+		Patient patient = patientRep.findByEmail(email);
+        if (patient != null && passwordEncoder.matches(password, patient.getPassword())) {
+            return patient;
+        }
+        return null;
+	}
+
+	public List<Patient> getAllPatients() {
+		return patientRep.findAll();
+	}
+
+	public List<Patient> searchPatientsByNameOrEmail(String searchTerm) {
+		return patientRep.findByNameContainingIgnoreCaseOrEmailContainingIgnoreCase(searchTerm , searchTerm);
+	}
+
+	public void deletePatientById(Long id) {
+		patientRep.deleteById(id);
+	}
+
+	public long countAllPatients() {
+	    return patientRep.count();
+	}
+
+	public void updatePatient(Patient loggedInPatient) {
+		patientRep.save(loggedInPatient);
+	}
+}
