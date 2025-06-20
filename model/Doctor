@@ -1,0 +1,170 @@
+package com.cityStar.model;
+import java.util.List;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+
+@Entity
+public class Doctor {
+
+	@Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long doctorId;
+    private String name;
+    private int age;
+    private String email;
+    private String phNumber;
+    private String specialization;
+    private int experienceYear;
+    private String qualification;
+    private String address;
+    private String doctorImg;
+    private String password;
+    private boolean confirmStatus;
+    
+    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL)
+    private List<DoctorSchedule> schedules;
+
+    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL)
+    private List<Appointment> appointments;
+
+	public Doctor() {
+		super();
+	}	
+
+	public Doctor(String name, int age, String email, String phNumber, String specialization, int experienceYear,
+			String qualification, String address, String doctorImg, String password, boolean confirmStatus,
+			List<DoctorSchedule> schedules, List<Appointment> appointments) {
+		super();
+		this.name = name;
+		this.age = age;
+		this.email = email;
+		this.phNumber = phNumber;
+		this.specialization = specialization;
+		this.experienceYear = experienceYear;
+		this.qualification = qualification;
+		this.address = address;
+		this.doctorImg = doctorImg;
+		this.password = password;
+		this.confirmStatus = confirmStatus;
+		this.schedules = schedules;
+		this.appointments = appointments;
+	}
+
+	public Long getDoctorId() {
+		return doctorId;
+	}
+
+	public void setDoctorId(Long doctorId) {
+		this.doctorId = doctorId;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public int getAge() {
+		return age;
+	}
+
+	public void setAge(int age) {
+		this.age = age;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public String getPhNumber() {
+		return phNumber;
+	}
+
+	public void setPhNumber(String phNumber) {
+		this.phNumber = phNumber;
+	}
+
+	public String getSpecialization() {
+		return specialization;
+	}
+
+	public void setSpecialization(String specialization) {
+		this.specialization = specialization;
+	}
+
+	public int getExperienceYear() {
+		return experienceYear;
+	}
+
+	public void setExperienceYear(int experienceYear) {
+		this.experienceYear = experienceYear;
+	}
+
+	public String getQualification() {
+		return qualification;
+	}
+
+	public void setQualification(String qualification) {
+		this.qualification = qualification;
+	}
+
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
+	public String getDoctorImg() {
+		return doctorImg;
+	}
+
+	public void setDoctorImg(String doctorImg) {
+		this.doctorImg = doctorImg;
+	}
+
+	public boolean isConfirmStatus() {
+		return confirmStatus;
+	}
+
+	public void setConfirmStatus(boolean confirmStatus) {
+		this.confirmStatus = confirmStatus;
+	}
+
+	public List<DoctorSchedule> getSchedules() {
+		return schedules;
+	}
+
+	public void setSchedules(List<DoctorSchedule> schedules) {
+		this.schedules = schedules;
+	}
+
+	public List<Appointment> getAppointments() {
+		return appointments;
+	}
+
+	public void setAppointments(List<Appointment> appointments) {
+		this.appointments = appointments;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+	
+}
