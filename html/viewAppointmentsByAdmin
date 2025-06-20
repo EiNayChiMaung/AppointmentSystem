@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard - City Star Clinic</title>
+    <link rel="stylesheet" th:href="@{/css/adminhome.css}"/>
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.6.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-...hash..." crossorigin="anonymous" referrerpolicy="no-referrer" />    
+</head>
+<body>
+    <div class="topbar">
+        <img th:src="@{/images/city1.png}" alt="City Star Logo" class="logo" width="150" height="50"> 
+         <div class="topbar-right">
+       		<i class="fa-solid fa-circle-user profile-icon" onclick="openProfileModal()" style="color: #3a8250;"></i>
+   		</div>     
+    </div>
+
+    <div class="container">
+        <div class="sidebar">
+            <ul>
+                <li><a th:href="@{/admin/home}"><i class="fa-solid fa-house-chimney-medical" style="color: #428566;"></i>Home</a></li>
+                <li><a th:href="@{/admin/viewDoctorRequests}"><i class="fa-solid fa-envelope" style="color: #428566;"></i>Requests</a></li>
+                <li><a th:href="@{/admin/viewDoctors}"><i class="fa-solid fa-user-doctor" style="color: #428566;"></i>Doctors</a></li>
+                <li><a th:href="@{/admin/viewPatients}"><i class="fa-solid fa-hospital-user" style="color: #428566;"></i>Patients</a></li>
+                <li><a th:href="@{/admin/viewAppointments}"><i class="fa-solid fa-calendar-check" style="color: #428566;"></i>Appointments</a></li>
+                <li><a th:href="@{/admin/logout}"><i class="fa-solid fa-right-from-bracket" style="color: #428566;"></i>Logout</a></li>
+            </ul>
+        </div>
+
+        <div class="main-content">
+        <form class="search-bar" action="/admin/searchAppointments" method="GET">
+            <input type="text" name="searchTerm" placeholder="Search Appointments" />
+            <button type="submit"><i class="fa-solid fa-magnifying-glass" style="color: #428566;"></i></button>
+        </form>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Patient</th>
+                        <th>Doctor</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+			    <tr th:each="appointment : ${appointments}">
+			    	<td th:text="${appointment.id}"></td>		        
+			        <td th:text="${appointment.patient.name}"></td>
+			        <td th:text="${appointment.doctor.name}"></td>
+			        <td th:text="${#temporals.format(appointment.doctorSchedule.date, 'yyyy-MM-dd')}"></td>
+			        <td th:text="${appointment.doctorSchedule.startTime} + ' - ' + ${appointment.doctorSchedule.endTime}"></td>
+					<td>
+					    <span th:if="${appointment.status.name() == 'REQUESTED'}" style="color: orange;">REQUESTED</span>
+					    <span th:if="${appointment.status.name() == 'VERIFIED'}" style="color: blue;">VERIFIED</span>
+					    <span th:if="${appointment.status.name() == 'CONFIRMED'}" style="color: green;">CONFIRMED</span>
+					    <span th:if="${appointment.status.name() == 'REJECTED'}" style="color: red;">REJECTED</span>
+					</td>
+			        <td>
+			            <form th:action="@{/admin/verifyAppointment}" method="post" style="display:inline;">
+			                <input type="hidden" name="appointmentId" th:value="${appointment.id}" />
+			                <button type="submit" class="status-btn" 
+			                        th:disabled="${appointment.status.name() != 'REQUESTED'}"><i class="fa-solid fa-circle-check" style="color: #428566;"></i></button>
+			            </form>
+			
+			            <form th:action="@{/admin/rejectAppointment}" method="post" style="display:inline;">
+			                <input type="hidden" name="appointmentId" th:value="${appointment.id}" />
+			                <button type="submit" class="status-btn" 
+			                       th:disabled="${appointment.status.name() != 'REQUESTED'}"><i class="fa-solid fa-circle-xmark" style="color: #f00000;"></i></button>
+			            </form>
+			        </td>
+			    </tr>
+    			</tbody>
+			</table>
+		</div>
+    </div>
+<div id="profile-modal" class="modal" style="display:none;">
+    <div class="modal-content">
+        <span class="close" onclick="closeProfileModal()">&times;</span>
+        <h2 style="text-align: center;color:#428566;">My Profile</h2>
+        <form th:action="@{/admin/updateProfile}" method="post">
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" th:value="${loggedInAdmin.name}" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" th:value="${loggedInAdmin.email}" required>
+            </div>
+            <div class="form-group">
+                <label for="phoneNumber">Phone Number:</label>
+                <input type="text" id="phoneNumber" name="phoneNumber" th:value="${loggedInAdmin.phoneNumber}" required>
+            </div>
+            <button type="submit" class="update-btn">Update</button>
+      </form>
+      </div>
+      </div>
+<script>
+    const profileIcon = document.querySelector('.profile-icon');
+    const modal = document.getElementById('profileModal');
+
+    profileIcon.addEventListener('click', () => {
+        modal.style.display = 'flex';
+    });
+
+    function openProfileModal() {
+        document.getElementById('profile-modal').style.display = 'block';
+    }
+    
+    function closeProfileModal() {
+    	 document.getElementById('profile-modal').style.display = 'none';
+    }
+
+    // Close modal on outside click
+    window.onclick = function(event) {
+        if (event.target === modal) {
+            closeModal();
+        }
+    }
+</script>
+</body>
+</html>
