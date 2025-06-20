@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>City Star Clinic - Patient Portal</title>
+    <link rel="stylesheet" th:href="@{/css/patienthome.css}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+    <!-- Top Navigation -->
+    <div class="topbar">
+        <img th:src="@{/images/city1.png}" alt="City Star Logo" class="logo">
+        
+        <div class="nav-menu">
+		  <a th:href="@{/patient/home}">Home</a>
+		  <a th:href="@{/patient/home#departments}">Departments</a>
+		  <a th:href="@{/patient/home#services}">Services</a>
+		  <a th:href="@{/patient/viewDoctors}">Doctors</a>
+		  <a th:href="@{/patient/viewAppointments}">Appointments</a>
+		  <i class="fas fa-user-circle profile-icon" onclick="openProfileModal()"></i>
+        </div>
+    </div>
+
+    <!-- Hero Section - Modified -->
+    <section id="home" class="hero">
+        <div class="hero-image">
+            <img th:src="@{/images/bg1.jpg}" alt="Doctor at City Star Clinic">
+        </div>
+        <div class="hero-content">
+            <h1>Welcome to City Star Clinic</h1>
+            <p>Your trusted healthcare provider offering comprehensive medical services with compassion and excellence. Our team of dedicated professionals is committed to your health and well-being.</p>
+            <a class="btn">Book an Appointment</a>
+        </div>
+    </section>
+
+    <!-- Departments Section -->
+    <section id="departments" class="departments">
+        <div class="section-title">
+            <h2>Our Departments</h2>
+            <p>Specialized care for all your health needs</p>
+        </div>
+        
+        <div class="departments-grid">
+            <div class="department-card">
+                <div class="department-img">
+                    <img th:src="@{/images/cardiology.jpg}" alt="Cardiology">
+                </div>
+                <div class="department-info">
+                    <h3>Cardiology</h3>
+                    <p>Comprehensive heart care with advanced diagnostic and treatment options.</p>
+                </div>
+            </div>
+            
+            <div class="department-card">
+                <div class="department-img">
+                    <img th:src="@{/images/neurology.jpg}" alt="Neurology">
+                </div>
+                <div class="department-info">
+                    <h3>Neurology</h3>
+                    <p>Expert care for disorders of the nervous system and brain.</p>
+                </div>
+            </div>
+            
+            <div class="department-card">
+                <div class="department-img">
+                    <img th:src="@{/images/pediatrics.jpg}" alt="Pediatrics">
+                </div>
+                <div class="department-info">
+                    <h3>Pediatrics</h3>
+                    <p>Specialized healthcare for infants, children, and adolescents.</p>
+                </div>
+            </div>
+            <div class="department-card">
+                <div class="department-img">
+                    <img th:src="@{/images/og.jpg}" alt="OG">
+                </div>
+                <div class="department-info">
+                    <h3>Obstetrics and gynaecology</h3>
+                    <p>Specialized care for women's reproductive health.</p>
+                </div>               
+            </div>
+            <div class="department-card">
+        <div class="department-img">
+            <img th:src="@{/images/orthopedics.jpg}" alt="Orthopedics">
+        </div>
+        <div class="department-info">
+            <h3>Orthopedics</h3>
+            <p>Specialized care for musculoskeletal system including bones, joints, ligaments, tendons, and muscles.</p>
+        </div>
+    </div> 
+    <div class="department-card">
+        <div class="department-img">
+            <img th:src="@{/images/dermatology.jpg}" alt="Dermatology">
+        </div>
+        <div class="department-info">
+            <h3>Dermatology</h3>
+            <p>Comprehensive skin care including treatment of conditions, cosmetic procedures, and skin cancer prevention.</p>
+        </div>
+    </div>
+    
+    <div class="department-card">
+        <div class="department-img">
+            <img th:src="@{/images/gastroenterology.jpg}" alt="Gastroenterology">
+        </div>
+        <div class="department-info">
+            <h3>Gastroenterology</h3>
+            <p>Expert care for digestive system disorders including stomach, intestines, liver, and pancreas.</p>
+        </div>
+    </div>
+    
+    <div class="department-card">
+        <div class="department-img">
+            <img th:src="@{/images/otolaryngology.png}" alt="ENT">
+        </div>
+        <div class="department-info">
+            <h3>ENT (Otolaryngology)</h3>
+            <p>Specialized treatment for ear, nose, and throat conditions including hearing and sinus disorders.</p>
+        </div>
+        </div>
+    </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="services">
+        <div class="section-title">
+            <h2>Our Services</h2>
+            <p>Quality healthcare services tailored to your needs</p>
+        </div>
+        
+        <div class="services-list">
+            <div class="service-item">
+                <div class="service-icon">
+                    <i class="fas fa-heartbeat"></i>
+                </div>
+                <div>
+                    <h3>Preventive Care</h3>
+                    <p>Regular check-ups and screenings to maintain your health and prevent diseases.</p>
+                </div>
+            </div>
+            
+            <div class="service-item">
+                <div class="service-icon">
+                    <i class="fas fa-procedures"></i>
+                </div>
+                <div>
+                    <h3>Diagnostic Services</h3>
+                    <p>Advanced imaging and laboratory tests for accurate diagnosis.</p>
+                </div>
+            </div>
+            
+            <div class="service-item">
+                <div class="service-icon">
+                    <i class="fas fa-pills"></i>
+                </div>
+                <div>
+                    <h3>Treatment Plans</h3>
+                    <p>Personalized treatment approaches for optimal recovery.</p>
+                </div>
+            </div>
+            
+            <div class="service-item">
+		        <div class="service-icon">
+		            <i class="fas fa-ambulance"></i>
+		        </div>
+		        <div>
+		            <h3>Emergency Care</h3>
+		            <p>24/7 emergency medical services with immediate attention for critical conditions.</p>
+		        </div>
+		    </div>
+		    
+		    <div class="service-item">
+		        <div class="service-icon">
+		            <i class="fas fa-user-md"></i>
+		        </div>
+		        <div>
+		            <h3>Specialist Consultations</h3>
+		            <p>Access to expert medical specialists across various fields for comprehensive care.</p>
+		        </div>
+		    </div>
+            
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+    	<div class="footer-links">
+          <a th:href="@{/patient/home}">Home</a>
+		  <a th:href="@{/patient/home#departments}">Departments</a>
+		  <a th:href="@{/patient/home#services}">Services</a>
+		  <a th:href="@{/patient/viewDoctors}">Doctors</a>
+		  <a th:href="@{/patient/viewAppointments}">Appointments</a>
+          <a href="#">Contact Us</a>
+        </div>
+        <p>City Star Clinic - Providing exceptional healthcare since 2005</p>
+        
+        <div class="copyright">
+            <p>&copy; 2023 City Star Clinic. All rights reserved.</p>
+        </div>
+    </footer>
+    
+    <div id="profile-modal" style="display:none;">
+    <div class="modal-content">
+        <span class="close" onclick="closeProfileModal()">&times;</span>
+        <h2 style="text-align: center;color:#428566;">My Profile</h2>
+        <form th:action="@{/patient/updateProfile}" method="post">
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" th:value="${loggedInPatient.name}" required>
+            </div>
+            <div class="form-group">
+                <label for="age">Age:</label>
+                <input type="number" id="age" name="age" th:value="${loggedInPatient.age}" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" th:value="${loggedInPatient.email}" required>
+            </div>
+            <div class="form-group">
+                <label for="address">Address:</label>
+                <input type="text" id="address" name="address" th:value="${loggedInPatient.address}" required>
+            </div>
+            <div class="form-group">
+                <label for="phNumber">Phone Number:</label>
+                <input type="text" id="phNumber" name="phNumber" th:value="${loggedInPatient.phNumber}" required>
+            </div>
+            <div class="button-group">
+                <button type="submit" class="update-btn">Update</button>
+                <a th:href="@{/patient/logout}" class="logout-btn">Logout</a>
+            </div>
+      </form>
+      </div>
+      </div>
+
+    <script>
+        // Smooth scrolling for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+                
+                // Update active nav item
+                document.querySelectorAll('.nav-menu a').forEach(item => {
+                    item.classList.remove('active');
+                });
+                this.classList.add('active');
+            });
+        });
+        
+        const profileIcon = document.querySelector('.profile-icon');
+        const modal = document.getElementById('profileModal');
+
+        profileIcon.addEventListener('click', () => {
+            modal.style.display = 'flex';
+        });
+
+        function openProfileModal() {
+            document.getElementById('profile-modal').style.display = 'flex';
+        }
+        
+        function closeProfileModal() {
+        	 document.getElementById('profile-modal').style.display = 'none';
+        }
+
+        // Close modal on outside click
+        window.onclick = function(event) {
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>
