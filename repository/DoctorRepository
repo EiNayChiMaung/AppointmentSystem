@@ -1,0 +1,21 @@
+package com.cityStar.repository;
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.cityStar.model.Doctor;
+
+public interface DoctorRepository extends JpaRepository<Doctor, Long> {
+
+	Doctor findByEmail(String email);
+
+	List<Doctor> findByConfirmStatus(boolean b);
+
+	List<Doctor> findByNameContainingIgnoreCaseOrEmailContainingIgnoreCaseAndConfirmStatus(String name,
+			String email, boolean b);
+
+	long countByConfirmStatus(boolean b);
+
+	List<Doctor> findByNameContainingIgnoreCaseAndConfirmStatus(String name, boolean b);
+
+}
