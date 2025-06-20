@@ -1,0 +1,234 @@
+package com.cityStar.controller;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.cityStar.model.Appointment;
+import com.cityStar.model.AppointmentStatus;
+import com.cityStar.model.Doctor;
+import com.cityStar.model.DoctorSchedule;
+import com.cityStar.service.AppointmentService;
+import com.cityStar.service.DoctorScheduleService;
+import com.cityStar.service.DoctorService;
+
+import jakarta.servlet.http.HttpSession;
+
+@Controller
+@RequestMapping("/doctor")
+public class DoctorController {
+
+	@Autowired
+	private DoctorService doctorSer;
+	@Autowired
+	private DoctorScheduleService scheduleSer;
+	@Autowired
+	private AppointmentService appointmentSer;
+	
+	@GetMapping("/signup")
+    public String showSignUpForm(Model model) {
+        model.addAttribute("doctor", new Doctor());
+        return "doctorSignUp";
+    }
+	
+	@GetMapping("/login")
+	public String showLoginForm() {
+		return "doctorLogin";
+	}
+	
+	@GetMapping("/logout")
+    public String logout(HttpSession session) {
+        session.invalidate();
+        return "redirect:/doctor/login";
+    }
+	
+	@PostMapping("signup")
+	public String doctorSignUp(@ModelAttribute("doctor") Doctor doctor,Model model) {
+		String result = doctorSer.registerDoctor(doctor);
+		if (result == null) {
+	        return "redirect:/doctor/login";
+	    }
+	    model.addAttribute("error", result); 
+	    return "doctorSignUp"; 
+	}
+	
+	@PostMapping("/login")
+	public String doctorLogin(@RequestParam("email") String email, @RequestParam("password") String password,HttpSession session, Model model) {
+	    String result = doctorSer.authenticateDoctor(email, password);
+	    if (!"success".equals(result)) {
+	        model.addAttribute("error", result); 
+	        return "doctorLogin";  
+	    }
+	    Doctor doctor = doctorSer.findByEmail(email);	      
+	    session.setAttribute("isDoctorLoggedIn", true);
+	    session.setAttribute("loggedInDoctor",doctor);
+	    return "redirect:/doctor/home";  
+	}
+	
+	@GetMapping("/home")
+	public String showDoctorHomePage(Model model,HttpSession session) {
+		Doctor loggedInDoctor = (Doctor) session.getAttribute("loggedInDoctor");
+		if(loggedInDoctor == null) {
+			 return "redirect:/doctor/login";
+		}
+		model.addAttribute("loggedInDoctor",loggedInDoctor);
+		return "doctorHome";
+	}
+	
+	@GetMapping("/chartData")
+	@ResponseBody
+	public Map<String, Object> getChartData(HttpSession session) {
+	    Doctor loggedInDoctor = (Doctor) session.getAttribute("loggedInDoctor");
+	    if (loggedInDoctor == null) {
+	        throw new RuntimeException("Not authenticated");
+	    }	    
+	    Map<String, Object> chartData = new HashMap<>();
+	    Map<String, Long> weeklyAppointments = appointmentSer.getWeeklyAppointmentsCount(loggedInDoctor.getDoctorId());
+	    chartData.put("weeklyAppointments", weeklyAppointments);
+	    Map<String, Long> ageDistribution = appointmentSer.getPatientAgeDistribution(loggedInDoctor.getDoctorId());
+	    chartData.put("ageDistribution", ageDistribution);   
+	    return chartData;
+	}
+	
+	@PostMapping("/updateProfile")
+	public String updateProfile(@ModelAttribute("doctor") Doctor doctor,HttpSession session) {
+		Doctor loggedInDoctor = (Doctor) session.getAttribute("loggedInDoctor");
+		if(loggedInDoctor == null) {
+			 return "redirect:/doctor/login";
+		}
+		loggedInDoctor.setName(doctor.getName());
+		loggedInDoctor.setAge(doctor.getAge());
+		loggedInDoctor.setEmail(doctor.getEmail());
+		loggedInDoctor.setAddress(doctor.getAddress());
+		loggedInDoctor.setPhNumber(doctor.getPhNumber());
+		loggedInDoctor.setSpecialization(doctor.getSpecialization());
+		loggedInDoctor.setQualification(doctor.getQualification());
+		loggedInDoctor.setExperienceYear(doctor.getExperienceYear());
+		doctorSer.save(loggedInDoctor);
+		session.setAttribute("loggedInDoctor", loggedInDoctor);
+		return "redirect:/doctor/home"; 
+	}
+	
+	@GetMapping("/createSchedule")
+	public String showCreateScheduleForm(HttpSession session, Model model) {
+	    Doctor loggedInDoctor = (Doctor) session.getAttribute("loggedInDoctor");
+	    if (loggedInDoctor == null) {
+	        return "redirect:/doctor/login";
+	    }	    
+	    List<DoctorSchedule> schedules = scheduleSer.getSchedulesByDoctor(loggedInDoctor);
+	    model.addAttribute("schedules", schedules);
+	    model.addAttribute("loggedInDoctor",loggedInDoctor);
+	    return "createSchedule";
+	}
+
+	@PostMapping("/createSchedule")
+	public String createSchedule(@RequestParam("date") String dateStr,@RequestParam("startTime") String startTimeStr, @RequestParam("endTime") String endTimeStr,
+	        HttpSession session, Model model){
+	    
+	    Doctor loggedInDoctor = (Doctor) session.getAttribute("loggedInDoctor");
+	    if (loggedInDoctor == null) {
+	        return "redirect:/doctor/login";
+	    }
+	    LocalDate date = LocalDate.parse(dateStr);
+	    LocalTime startTime = LocalTime.parse(startTimeStr);
+	    LocalTime endTime = LocalTime.parse(endTimeStr);
+	    
+	    scheduleSer.createSchedule(date, startTime, endTime, loggedInDoctor);
+	    return "redirect:/doctor/createSchedule";
+	}
+
+	@GetMapping("/getSchedule/{id}")
+	public @ResponseBody DoctorSchedule getSchedule(@PathVariable Long id, HttpSession session) {
+	    Doctor loggedInDoctor = (Doctor) session.getAttribute("loggedInDoctor");
+	    if (loggedInDoctor == null) {
+	        throw new RuntimeException("Not authenticated");
+	    }	    
+	    DoctorSchedule schedule = scheduleSer.getScheduleById(id);
+	    if (!schedule.getDoctor().getDoctorId().equals(loggedInDoctor.getDoctorId())) {
+	        throw new RuntimeException("Unauthorized access to schedule");
+	    }
+	    return schedule;
+	}
+
+	@PostMapping("/updateSchedule/{id}")
+	public String updateSchedule( @PathVariable Long id,@RequestParam("date") String dateStr,@RequestParam("startTime") String startTimeStr,
+	        @RequestParam("endTime") String endTimeStr,
+	        HttpSession session) {   
+	    Doctor loggedInDoctor = (Doctor) session.getAttribute("loggedInDoctor");
+	    if (loggedInDoctor == null) {
+	        return "redirect:/doctor/login";
+	    }	    
+	    LocalDate date = LocalDate.parse(dateStr);
+	    LocalTime startTime = LocalTime.parse(startTimeStr);
+	    LocalTime endTime = LocalTime.parse(endTimeStr);
+	    
+	    DoctorSchedule schedule = scheduleSer.getScheduleById(id);
+	    if (!schedule.getDoctor().getDoctorId().equals(loggedInDoctor.getDoctorId())) {
+	        throw new RuntimeException("Unauthorized access to schedule");
+	    }	    
+	    scheduleSer.updateSchedule(id, date, startTime, endTime);
+	    return "redirect:/doctor/createSchedule";
+	}
+	
+	@PostMapping("/deleteSchedule/{id}")
+	public String deleteSchedule(@PathVariable Long id, HttpSession session) {
+	    Doctor loggedInDoctor = (Doctor) session.getAttribute("loggedInDoctor");
+	    if (loggedInDoctor == null) {
+	        return "redirect:/doctor/login";
+	    }
+	    DoctorSchedule schedule = scheduleSer.getScheduleById(id);
+	    if (!schedule.getDoctor().getDoctorId().equals(loggedInDoctor.getDoctorId())) {
+	        throw new RuntimeException("Unauthorized access to schedule");
+	    }	    
+	    scheduleSer.deleteSchedule(id);
+	    return "redirect:/doctor/createSchedule";
+	}
+	
+	@GetMapping("/viewAppointments")
+	public String viewDoctorAppointments(Model model,HttpSession session) {
+		Doctor loggedInDoctor = (Doctor) session.getAttribute("loggedInDoctor");
+	    if (loggedInDoctor == null) {
+	        return "redirect:/doctor/login";
+	    }
+	    List<Appointment> appointments = appointmentSer.getVerifiedAppointmentsByDoctor(loggedInDoctor.getDoctorId());
+	    model.addAttribute("appointments", appointments);
+	    model.addAttribute("loggedInDoctor",loggedInDoctor);
+	    return "viewAppointmentsByDoctor";
+	}
+	
+	@PostMapping("/confirmAppointment")
+	public String confirmAppointment(@RequestParam("appointmentId") Long appointmentId) {
+	    appointmentSer.updateAppointmentStatus(appointmentId, AppointmentStatus.CONFIRMED);
+	    return "redirect:/doctor/viewHistory";
+	}
+
+	@PostMapping("/rejectAppointment")
+	public String rejectAppointment(@RequestParam("appointmentId") Long appointmentId) {
+	    appointmentSer.updateAppointmentStatus(appointmentId, AppointmentStatus.REJECTED);
+	    return "redirect:/doctor/viewAppointments";
+	}
+	
+	@GetMapping("/viewHistory")
+	public String viewHistory(Model model,HttpSession session) {
+		Doctor loggedInDoctor = (Doctor) session.getAttribute("loggedInDoctor");
+	    if (loggedInDoctor == null) {
+	        return "redirect:/doctor/login";
+	    }
+	    List<Appointment> appointments = appointmentSer.getConfirmedAppointmentsByDoctor(loggedInDoctor.getDoctorId());
+	    model.addAttribute("appointments", appointments);
+	    model.addAttribute("loggedInDoctor",loggedInDoctor);
+	    return "viewHistoryByDoctor";
+	}
+}
