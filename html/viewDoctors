@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard - City Star Clinic</title>
+    <link rel="stylesheet" th:href="@{/css/adminhome.css}"/>
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.6.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-...hash..." crossorigin="anonymous" referrerpolicy="no-referrer" />    
+</head>
+<body>
+    <div class="topbar">
+        <img th:src="@{/images/city1.png}" alt="City Star Logo" class="logo" width="150" height="50"> 
+         <div class="topbar-right">
+       		<i class="fa-solid fa-circle-user profile-icon" onclick="openProfileModal()" style="color: #3a8250;"></i>
+   		</div>     
+    </div>
+
+    <div class="container">
+        <div class="sidebar">
+            <ul>
+                <li><a th:href="@{/admin/home}"><i class="fa-solid fa-house-chimney-medical" style="color: #428566;"></i>Home</a></li>
+                <li><a th:href="@{/admin/viewDoctorRequests}"><i class="fa-solid fa-envelope" style="color: #428566;"></i>Requests</a></li>
+                <li><a th:href="@{/admin/viewDoctors}"><i class="fa-solid fa-user-doctor" style="color: #428566;"></i>Doctors</a></li>
+                <li><a th:href="@{/admin/viewPatients}"><i class="fa-solid fa-hospital-user" style="color: #428566;"></i>Patients</a></li>
+                <li><a th:href="@{/admin/viewAppointments}"><i class="fa-solid fa-calendar-check" style="color: #428566;"></i>Appointments</a></li>
+                <li><a th:href="@{/admin/logout}"><i class="fa-solid fa-right-from-bracket" style="color: #428566;"></i>Logout</a></li>
+            </ul>
+        </div>
+
+        <div class="main-content">
+        <form class="search-bar" action="/admin/searchDoctors" method="GET">
+            <input type="text" name="searchTerm" placeholder="Search Doctors" />
+            <button type="submit"><i class="fa-solid fa-magnifying-glass" style="color: #428566;"></i></button>
+        </form>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Age</th>
+                        <th>Email</th>
+                        <th>Address</th>
+                        <th>Phone Number</th>
+                        <th>Specialization</th>
+                        <th>Qualification</th>
+                        <th>Experience Years</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="doctor : ${approvedDoctors}">
+                        <td th:text="${doctor.doctorId}"></td>
+                        <td th:text="${doctor.name}"></td>
+                        <td th:text="${doctor.age}"></td>                      
+                        <td th:text="${doctor.email}"></td>
+                        <td th:text="${doctor.address}"></td>
+                        <td th:text="${doctor.phNumber}"></td>
+                        <td th:text="${doctor.specialization}"></td>
+                        <td th:text="${doctor.qualification}"></td>
+                        <td th:text="${doctor.experienceYear}"></td>
+                        <td>
+                       <button 
+						    class="icon-btn"
+						    onclick="openModal(this)"
+						    th:data-id="${doctor.doctorId}"
+						    th:data-name="${doctor.name}"
+						    th:data-age="${doctor.age}"
+						    th:data-email="${doctor.email}"
+						    th:data-address="${doctor.address}"
+						    th:data-phNumber="${doctor.phNumber}"
+						    th:data-specialization="${doctor.specialization}"
+						    th:data-qualification="${doctor.qualification}"
+						    th:data-experience="${doctor.experienceYear}">
+						    <i class="fa-solid fa-pen-to-square" style="color: #428566;"></i>
+						</button>
+                        <form th:action="@{/admin/deleteDoctor/{id}(id=${doctor.doctorId})}" method="POST" style="display:inline;">
+                            <button type="submit" class="icon-btn" onclick="return confirm('Are you sure you want to remove this doctor?')"><i class="fa-solid fa-trash" style="color: #f00000;"></i></button>
+                        </form>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        </div>
+        
+<div id="editDoctorModal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h2 style="text-align: center;color:#428566;">Doctor Information</h2>
+        <form id="editDoctorForm" method="post" th:action="@{/admin/updateDoctor}">
+            <!-- Hidden Doctor ID: NOT editable -->
+            <input type="hidden" id="editDoctorId" name="doctorId">
+
+            <div class="form-field">
+                <label for="editName">Name:</label>
+                <input type="text" id="editName" name="name" required>
+            </div>
+
+            <div class="form-field">
+                <label for="editAge">Age:</label>
+                <input type="number" id="editAge" name="age" required>
+            </div>
+
+            <div class="form-field">
+                <label for="editEmail">Email:</label>
+                <input type="text" id="editEmail" name="email" required>
+            </div>
+            
+            <div class="form-field">
+                <label for="editAddress">Address:</label>
+                <input type="text" id="editAddress" name="address" required>
+            </div>
+            
+            <div class="form-field">
+                <label for="editPhNumber">Phone Number:</label>
+                <input type="text" id="editPhNumber" name="phNumber" required>
+            </div>
+            
+            <div class="form-field">
+                <label for="editSpecialization">Specialization:</label>
+                <input type="text" id="editSpecialization" name="specialization" required>
+            </div>
+
+            <div class="form-field">
+                <label for="editQualification">Qualification:</label>
+                <input type="text" id="editQualification" name="qualification" required>
+            </div>
+
+            <div class="form-field">
+                <label for="editExperienceYear">Experience (Years):</label>
+                <input type="number" id="editExperienceYear" name="experienceYear" required>
+            </div>
+
+            <button type="submit" class="btn">Update</button>
+        </form>
+    </div>
+</div>
+<div id="profile-modal" class="modal" style="display:none;">
+    <div class="modal-content">
+        <span class="close" onclick="closeProfileModal()">&times;</span>
+        <h2 style="text-align: center;color:#428566;">My Profile</h2>
+        <form th:action="@{/admin/updateProfile}" method="post">
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" th:value="${loggedInAdmin.name}" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" th:value="${loggedInAdmin.email}" required>
+            </div>
+            <div class="form-group">
+                <label for="phoneNumber">Phone Number:</label>
+                <input type="text" id="phoneNumber" name="phoneNumber" th:value="${loggedInAdmin.phoneNumber}" required>
+            </div>
+            <button type="submit" class="update-btn">Update</button>
+      </form>
+      </div>
+      </div>
+<script>
+    const profileIcon = document.querySelector('.profile-icon');
+    const modal = document.getElementById('profileModal');
+
+    profileIcon.addEventListener('click', () => {
+        modal.style.display = 'flex';
+    });
+
+    function openProfileModal() {
+        document.getElementById('profile-modal').style.display = 'flex';
+    }
+    
+    function closeProfileModal() {
+    	 document.getElementById('profile-modal').style.display = 'none';
+    }
+
+    // Close modal on outside click
+    window.onclick = function(event) {
+        if (event.target === modal) {
+            closeModal();
+        }
+    }
+</script>
+<script>
+function openModal(button) {
+    // Get doctor data from button's data attributes
+    const doctorId = button.getAttribute("data-id");
+    const name = button.getAttribute("data-name");
+    const age = button.getAttribute("data-age");
+    const email = button.getAttribute("data-email");
+    const address=button.getAttribute("data-address")
+    const phNumber=button.getAttribute("data-phNumber")
+    const specialization = button.getAttribute("data-specialization");
+    const qualification = button.getAttribute("data-qualification");
+    const experienceYear = button.getAttribute("data-experience");
+
+    // Set modal input values
+    document.getElementById("editDoctorId").value = doctorId;
+    document.getElementById("editName").value = name;
+    document.getElementById("editAge").value = age;
+    document.getElementById("editEmail").value = email;
+    document.getElementById("editAddress").value = address;
+    document.getElementById("editPhNumber").value = phNumber;
+    document.getElementById("editSpecialization").value = specialization;
+    document.getElementById("editQualification").value = qualification;
+    document.getElementById("editExperienceYear").value = experienceYear;
+
+    // Show modal
+    document.getElementById("editDoctorModal").style.display = "flex";
+}
+
+function closeModal() {
+    document.getElementById("editDoctorModal").style.display = "none";
+}
+</script>
+</body>
+</html>
