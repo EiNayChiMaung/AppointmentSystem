@@ -1,0 +1,100 @@
+package com.cityStar.service;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.cityStar.model.Appointment;
+import com.cityStar.model.AppointmentStatus;
+import com.cityStar.model.Doctor;
+import com.cityStar.model.DoctorSchedule;
+import com.cityStar.model.Patient;
+import com.cityStar.repository.AppointmentRepository;
+
+@Service
+public class AppointmentService {
+
+	@Autowired
+	private AppointmentRepository appointmentRep;
+	@Autowired
+	private DoctorScheduleService doctorScheduleSer;
+	
+	public void addAppointment(Doctor doctor, Patient patient, Long scheduleId) {
+			DoctorSchedule schedule = doctorScheduleSer.getScheduleById(scheduleId);
+
+	        Appointment appointment = new Appointment();
+	        appointment.setDatetime(LocalDateTime.now());
+	        appointment.setStatus(AppointmentStatus.REQUESTED);
+	        appointment.setDoctor(doctor);
+	        appointment.setPatient(patient);
+	        appointment.setDoctorSchedule(schedule);
+	        appointmentRep.save(appointment);
+		}
+
+	public List<Appointment> getAllAppointments() {
+		return appointmentRep.findAll();
+	}
+
+	public void updateAppointmentStatus(Long appointmentId, AppointmentStatus status) {
+	    Appointment appointment = appointmentRep.findById(appointmentId)
+	            .orElseThrow(() -> new RuntimeException("Appointment not found"));
+	    appointment.setStatus(status);
+	    appointmentRep.save(appointment);
+	}
+
+	public List<Appointment> searchAppointmentsByPatientOrDoctor(String searchTerm) {		
+		return appointmentRep.findByPatientNameContainingIgnoreCaseOrDoctorNameContainingIgnoreCase(searchTerm);
+	}
+
+	public List<Appointment> getVerifiedAppointmentsByDoctor(Long doctorId) {
+		return appointmentRep.findByDoctor_doctorIdAndStatus(doctorId, AppointmentStatus.VERIFIED);
+	}
+
+	public long countAllAppointments() {
+		return appointmentRep.count();
+	}
+
+	public List<Appointment> getConfirmedAppointmentsByDoctor(Long doctorId) {
+		return appointmentRep.findByDoctor_doctorIdAndStatus(doctorId, AppointmentStatus.CONFIRMED);
+	}
+
+	public List<Appointment> getAppointmentsByPatient(Long patientId) {
+		return appointmentRep.findByPatient_patientId(patientId);
+	}
+	
+
+	public Map<String, Long> getWeeklyAppointmentsCount(Long doctorId) {
+	    LocalDate today = LocalDate.now();
+	    LocalDate startOfWeek = today.with(DayOfWeek.MONDAY);	    
+	    Map<String, Long> weeklyData = new LinkedHashMap<>();    
+	    for (int i = 0; i < 7; i++) {
+	        LocalDate date = startOfWeek.plusDays(i);
+	        long count = appointmentRep.countByDoctorDoctorIdAndDoctorScheduleDate(doctorId, date);
+	        weeklyData.put(date.getDayOfWeek().toString().substring(0, 3), count);
+	    }	    
+	    return weeklyData;
+	}
+	
+	public Map<String, Long> getPatientAgeDistribution(Long doctorId) {
+	    Map<String, Long> distribution = new LinkedHashMap<>();
+	    distribution.put("18-30", 
+	        appointmentRep.countByDoctorDoctorIdAndPatientAgeBetween(doctorId, 18, 30));
+	    distribution.put("31-45", 
+	        appointmentRep.countByDoctorDoctorIdAndPatientAgeBetween(doctorId, 31, 45));
+	    distribution.put("46-60", 
+	        appointmentRep.countByDoctorDoctorIdAndPatientAgeBetween(doctorId, 46, 60));
+	    distribution.put("60+", 
+	        appointmentRep.countByDoctorDoctorIdAndPatientAgeGreaterThanEqual(doctorId, 60));	    
+	    return distribution;
+	}
+}
+	
+
+	
+
+
