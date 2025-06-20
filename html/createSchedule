@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Schedule - City Star Clinic</title>
+    <link rel="stylesheet" th:href="@{/css/doctorhome.css}"/>
+    <link rel="stylesheet" th:href="@{/css/createSchedule.css}"/>
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.6.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-...hash..." crossorigin="anonymous" referrerpolicy="no-referrer" />    
+</head>
+<body>
+    <div class="topbar">
+        <img th:src="@{/images/city1.png}" alt="City Star Logo" class="logo" width="150" height="50"> 
+         <div class="topbar-right">
+            <i class="fa-solid fa-circle-user profile-icon" onclick="openProfileModal()" style="color: #3a8250;"></i>
+        </div>     
+    </div>
+
+    <div class="container">
+        <div class="sidebar">
+            <ul>
+                <li><a th:href="@{/doctor/home}"><i class="fa-solid fa-house-chimney-medical" style="color: #428566;"></i>Home</a></li>
+                <li><a th:href="@{/doctor/createSchedule}"><i class="fa-solid fa-clock" style="color: #428566;"></i>Schedule</a></li>
+                <li><a th:href="@{/doctor/viewAppointments}"><i class="fa-solid fa-calendar-check" style="color: #428566;"></i>Appointments</a></li>
+                <li><a th:href="@{/doctor/viewHistory}"><i class="fa-solid fa-clock-rotate-left" style="color: #428566;"></i>History</a></li>
+                <li><a th:href="@{/doctor/logout}"><i class="fa-solid fa-right-from-bracket" style="color: #428566;"></i>Logout</a></li>
+            </ul>
+        </div>
+
+        <div class="main-content">
+            <div class="schedule-container">
+                <form th:action="@{/doctor/createSchedule}" method="post" class="schedule-form">
+                    <div class="schedule-form-group">
+                        <label for="date">Date:</label>
+                        <input type="date" id="date" name="date" required>
+                    </div>
+                    <div class="schedule-form-group">
+                        <label for="startTime">Start Time:</label>
+                        <input type="time" id="startTime" name="startTime" required>
+                    </div>
+                    <div class="schedule-form-group">
+                        <label for="endTime">End Time:</label>
+                        <input type="time" id="endTime" name="endTime" required>
+                    </div>
+                    <button type="submit" class="btn-submit">Create Schedule</button>
+                </form>
+
+                <div class="existing-schedules">
+                    <h3>Your Schedules</h3>
+                    <div class="schedule-list">
+                        <div th:if="${schedules.empty}">
+                            <p>No schedules created yet.</p>
+                        </div>
+                        <div th:each="schedule : ${schedules}" class="schedule-item">
+						    <div class="schedule-info">
+						        <span class="schedule-date" th:text="${#temporals.format(schedule.date, 'dd MMM yyyy')}"
+						        		th:attr="data-date-value=${#temporals.format(schedule.date, 'yyyy-MM-dd')}"></span>
+						        <span class="schedule-time" th:text="${#temporals.format(schedule.startTime, 'HH:mm') + ' - ' + #temporals.format(schedule.endTime, 'HH:mm')}"></span>
+						    </div>
+						    <div class="schedule-actions">
+						    <button class="btn-update" 
+						        th:data-id="${schedule.id}"
+						        onclick="loadScheduleData(this)"><i class="fa-solid fa-pen-to-square" style="color: #428566;"></i></button>
+						          <form th:action="@{/doctor/deleteSchedule/{id}(id=${schedule.id})}" method="post" class="delete-form">
+						            <button type="submit" class="btn-delete"><i class="fa-solid fa-trash" style="color: #f00000;"></i></button>
+						        </form>
+						    </div>
+						</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Update Schedule Modal -->
+    <div id="update-modal" class="update-modal" style="display:none;">
+    <div class="modal-content">
+        <span class="close" onclick="closeUpdateModal()">&times;</span>
+        <h2 style="color:#428566; text-align:center">Update Schedule </h2>
+        <form id="update-form" method="post" class="schedule-form">
+            <!-- ID is hidden and not editable -->
+            <input type="hidden" id="update-id" name="id">
+            
+            <div class="form-group">
+                <label for="update-date">Date:</label>
+                <input type="date" id="update-date" name="date" required>
+            </div>
+            <div class="form-group">
+                <label for="update-startTime">Start Time:</label>
+                <input type="time" id="update-startTime" name="startTime" required>
+            </div>
+            <div class="form-group">
+                <label for="update-endTime">End Time:</label>
+                <input type="time" id="update-endTime" name="endTime" required>
+            </div>
+            <button type="submit" class="btn-submit">Update</button>
+        </form>
+    </div>
+</div>
+    
+    <div id="profile-modal" style="display:none;">
+    <div class="modal-content">
+        <span class="close" onclick="closeProfileModal()">&times;</span>
+        <div class="profile-image">
+                <img th:src="@{'/images/'+${loggedInDoctor.doctorImg}}" alt="Doctor Image" class="dr-img">
+        </div>
+        <form th:action="@{/doctor/updateProfile}" method="post">
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" th:value="${loggedInDoctor.name}" required>
+            </div>
+            <div class="form-group">
+                <label for="age">Age:</label>
+                <input type="number" id="age" name="age" th:value="${loggedInDoctor.age}" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" th:value="${loggedInDoctor.email}" required>
+            </div>
+            <div class="form-group">
+                <label for="phNumber">Phone Number:</label>
+                <input type="text" id="phNumber" name="phNumber" th:value="${loggedInDoctor.phNumber}" required>               
+            </div>
+            <div class="form-group">
+                <label for="address">Address:</label>
+                <input type="text" id="address" name="address" th:value="${loggedInDoctor.address}" required>               
+            </div>
+            <div class="form-group">
+                <label for="specialization">Specialization:</label>
+                <input type="text" id="specialization" name="specialization" th:value="${loggedInDoctor.specialization}" required>               
+            </div>
+            <div class="form-group">
+                <label for="qualification">Qualification:</label>
+                <input type="text" id="qualification" name="qualification" th:value="${loggedInDoctor.qualification}" required>               
+            </div>
+            <div class="form-group">
+                <label for="experienceYear">Years of Experience:</label>
+                <input type="number" id="experienceYear" name="experienceYear" th:value="${loggedInDoctor.experienceYear}" required>               
+            </div>
+            <button type="submit" class="update-btn">Update</button>
+      </form>
+      </div>
+      </div>
+
+<script>
+    const profileIcon = document.querySelector('.profile-icon');
+    const modal = document.getElementById('profileModal');
+
+    profileIcon.addEventListener('click', () => {
+        modal.style.display = 'flex';
+    });
+
+    function openProfileModal() {
+        document.getElementById('profile-modal').style.display = 'flex';
+    }
+    
+    function closeProfileModal() {
+    	 document.getElementById('profile-modal').style.display = 'none';
+    }
+
+    // Close modal on outside click
+    window.onclick = function(event) {
+        if (event.target === modal) {
+            closeModal();
+        }
+    }
+</script>
+<script>
+    // Update Schedule Modal Functions
+    function loadScheduleData(button) {
+        const id = button.getAttribute('data-id');
+        
+        // Get the schedule item container
+        const scheduleItem = button.closest('.schedule-item');
+        
+        // Get the values from the displayed schedule
+        const date = scheduleItem.querySelector('.schedule-date').getAttribute('data-date-value');
+        const timeRange = scheduleItem.querySelector('.schedule-time').textContent;
+        const [startTime, endTime] = timeRange.split(' - ');
+        
+        // Set the values in the modal
+        document.getElementById('update-id').value = id;
+        document.getElementById('update-date').value = date;
+        document.getElementById('update-startTime').value = startTime;
+        document.getElementById('update-endTime').value = endTime;
+        
+        // Set form action
+        document.getElementById('update-form').action = '/doctor/updateSchedule/' + id;
+        
+        // Show modal
+        document.getElementById('update-modal').style.display = 'flex';
+    }
+    
+    function closeUpdateModal() {
+        document.getElementById('update-modal').style.display = 'none';
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        if (event.target === document.getElementById('update-modal')) {
+            closeUpdateModal();
+        }
+    }
+</script>
+</body>
+</html>
