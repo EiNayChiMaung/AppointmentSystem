@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Registration</title>
+    <link rel="stylesheet" th:href="@{/css/doctorsignup.css}">
+</head>
+<body>
+    <div class="container">
+        <div class="form-box">
+            <h2>Doctor Registration</h2>
+            <form th:action="@{/doctor/signup}" method="post" th:object="${doctor}">
+                <div class="input-group">
+                    <label for="name">Name:</label>
+                    <input type="text" id="name" th:field="*{name}" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="age">Age:</label>
+                    <input type="number" id="age" th:field="*{age}" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" th:field="*{email}" required>
+                </div>
+				<p th:if="${error}" class="error-message" th:text="${error}"></p>
+                <div class="input-group">
+                    <label for="phNumber">Phone Number:</label>
+                    <input type="text" id="phNumber" th:field="*{phNumber}" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="specialization">Specialization:</label>
+                    <input type="text" id="specialization" th:field="*{specialization}" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="experienceYear">Years of Experience:</label>
+                    <input type="number" id="experienceYear" th:field="*{experienceYear}" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="qualification">Qualification:</label>
+                    <input type="text" id="qualification" th:field="*{qualification}" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="address">Address:</label>
+                    <input type="text" id="address" th:field="*{address}" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="doctorImg">Image URL:</label>
+                    <input type="file" id="doctorImg" th:field="*{doctorImg}" required>
+                </div>
+                <div class="input-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" th:field="*{password}" required>
+                </div>        
+
+                <button type="submit" class="btn">Sign Up</button>
+            </form>
+
+            <p>Already have an account? <a th:href="@{/doctor/login}">Login here</a></p>
+        </div>
+    </div>
+</body>
+</html>
