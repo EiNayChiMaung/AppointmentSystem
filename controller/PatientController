@@ -1,0 +1,151 @@
+package com.cityStar.controller;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import com.cityStar.model.Appointment;
+import com.cityStar.model.Doctor;
+import com.cityStar.model.Patient;
+import com.cityStar.service.AppointmentService;
+import com.cityStar.service.DoctorService;
+import com.cityStar.service.PatientService;
+
+import jakarta.servlet.http.HttpSession;
+
+@Controller
+@RequestMapping("/patient")
+public class PatientController {
+
+	@Autowired
+	private PatientService patientSer;
+	@Autowired
+	private DoctorService doctorSer;
+	@Autowired
+	private AppointmentService appointmentSer;
+	
+	@GetMapping("/signup")
+    public String showSignUpPage(Model model) {
+        model.addAttribute("patient", new Patient()); 
+        return "patientSignUp"; 
+    }
+	
+	@PostMapping("/signup")
+    public String registerPatient(@ModelAttribute("patient") Patient patient, Model model) {
+        String result = patientSer.registerPatient(patient); 
+        if (result != null) {
+            model.addAttribute("error", result); 
+            return "patientSignUp";
+        }
+        return "redirect:/patient/login";
+    }
+	
+	@GetMapping("/login")
+	public String showLoginPage() {
+		return "patientLogin";
+	}
+	
+	@GetMapping("/logout")
+    public String logout(HttpSession session) {
+        session.invalidate();
+        return "redirect:/patient/login";
+    }
+	
+	@PostMapping("/login")
+    public String processCustomerLogin(@ModelAttribute("patient") Patient patient, Model model, HttpSession session) {
+        Patient loggedInPatient = patientSer.loginPatient(patient.getEmail(), patient.getPassword());       
+        if (loggedInPatient != null) {
+            session.setAttribute("loggedInPatient", loggedInPatient);
+            return "redirect:/patient/home";
+        }        
+        model.addAttribute("error", "Invalid email or password. Try again.");
+        return "patientLogin";
+    }
+	
+	@GetMapping("/home")
+	public String showHomePage(Model model,  HttpSession session) {
+		Patient loggedInPatient = (Patient) session.getAttribute("loggedInPatient");
+		if (loggedInPatient==null) {
+			return "redirect:/patient/login";
+		}
+		model.addAttribute("loggedInPatient",loggedInPatient);
+		return "patientHome";
+	}
+	
+	@PostMapping("/updateProfile")
+	public String updateProfile(@ModelAttribute("patient") Patient patient, HttpSession session) {
+		Patient loggedInPatient = (Patient) session.getAttribute("loggedInPatient");
+		if (loggedInPatient==null) {
+			return "redirect:/patient/login";
+		}
+		loggedInPatient.setName(patient.getName());
+		loggedInPatient.setAge(patient.getAge());
+		loggedInPatient.setEmail(patient.getEmail());
+		loggedInPatient.setAddress(patient.getAddress());
+		loggedInPatient.setPhNumber(patient.getPhNumber());
+		patientSer.updatePatient(loggedInPatient);
+		session.setAttribute("loggedInPatient", loggedInPatient);
+		return "redirect:/patient/home";
+	}
+	
+	@GetMapping("/viewDoctors")
+	public String viewDoctorsByPatient(Model model,  HttpSession session) {
+		Patient loggedInPatient = (Patient) session.getAttribute("loggedInPatient");
+		if (loggedInPatient==null) {
+			return "redirect:/patient/login";
+		}
+	    List<Doctor> doctors = doctorSer.getDoctorsByConfirmStatus(true);
+	    model.addAttribute("doctors", doctors);
+	    model.addAttribute("loggedInPatient",loggedInPatient);
+	    return "viewDoctorsByPatient";
+	}
+	
+	@GetMapping("/searchDoctors")
+	public String searchDoctors(@RequestParam("searchTerm") String searchTerm, Model model,HttpSession session) {
+		Patient loggedInPatient = (Patient) session.getAttribute("loggedInPatient");
+		if (loggedInPatient==null) {
+			return "redirect:/patient/login";
+		}
+		if (searchTerm == null || searchTerm.trim().isEmpty()) {
+	        model.addAttribute("doctors", doctorSer.getDoctorsByConfirmStatus(true));
+	    } else {
+	        List<Doctor> searchResults = doctorSer.searchDoctorsByName(searchTerm);
+	        model.addAttribute("doctors", searchResults);	   	        	   
+	    }
+		model.addAttribute("loggedInPatient",loggedInPatient);
+		return "viewDoctorsByPatient";
+	}
+	
+    @GetMapping("/bookAppointment/{doctorId}")
+    public String bookAppointment(@PathVariable Long doctorId,@RequestParam Long scheduleId,HttpSession session) {       
+        Patient patient = (Patient) session.getAttribute("loggedInPatient");
+        if (patient == null) {
+            return "redirect:/patient/login";
+        }
+        Doctor doctor = doctorSer.findById(doctorId);
+        if (doctor == null) {
+            return "redirect:/patient/viewDoctors";
+        }        
+        appointmentSer.addAppointment(doctor,patient,scheduleId);       
+        return "redirect:/patient/viewAppointments";
+    }
+    
+    @GetMapping("/viewAppointments")
+    public String viewAppointments(Model model, HttpSession session) {
+    	Patient loggedInPatient = (Patient) session.getAttribute("loggedInPatient");
+		if (loggedInPatient==null) {
+			return "redirect:/patient/login";
+		}
+		List<Appointment> appointments = appointmentSer.getAppointmentsByPatient(loggedInPatient.getPatientId());
+		model.addAttribute("appointments",appointments);
+		model.addAttribute("loggedInPatient",loggedInPatient);
+		return "viewAppointmentsByPatient";
+    }
+}
