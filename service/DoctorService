@@ -1,0 +1,97 @@
+package com.cityStar.service;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import com.cityStar.model.Doctor;
+import com.cityStar.repository.DoctorRepository;
+
+@Service
+public class DoctorService {
+
+	@Autowired
+	private DoctorRepository doctorRep;
+
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
+	
+	public String registerDoctor(Doctor doctor) {
+		if (doctorRep.findByEmail(doctor.getEmail()) != null) {
+            return "Email already exists";
+        }
+        doctor.setPassword(passwordEncoder.encode(doctor.getPassword()));
+        doctor.setConfirmStatus(false);;
+        doctorRep.save(doctor);
+        return null;
+	}
+
+	public String authenticateDoctor(String email, String password) {
+		Doctor doctor = doctorRep.findByEmail(email);
+        if (doctor == null) {
+            return "Invalid email or password";
+        }
+        if (!passwordEncoder.matches(password, doctor.getPassword())) {
+            return "Invalid email or password";
+        }
+        if (!doctor.isConfirmStatus()) {
+            return "Your account is pending approval by the admin.";
+        }
+        return "success";
+	}
+
+	public Doctor findByEmail(String email) {		
+		return doctorRep.findByEmail(email);
+	}
+
+	public List<Doctor> getDoctorsByConfirmStatus(boolean b) {
+		return doctorRep.findByConfirmStatus(b);
+	}
+
+	public void approveDoctor(Long doctorId) {
+		Doctor doctor = doctorRep.findById(doctorId).orElseThrow(() -> new IllegalArgumentException("Invalid doctor ID"));
+		doctor.setConfirmStatus(true);
+		doctorRep.save(doctor);
+	}
+
+	public List<Doctor> searchDoctorsByNameOrEmail(String searchTerm) {
+		return doctorRep.findByNameContainingIgnoreCaseOrEmailContainingIgnoreCaseAndConfirmStatus(searchTerm, searchTerm, true);
+	}
+
+	public Doctor findById(Long doctorId) {		
+		return doctorRep.findById(doctorId).get();
+	}
+
+	public void deleteDoctorById(Long id) {
+		doctorRep.deleteById(id);
+	}
+
+	public long countApprovedDoctors() {
+	    return doctorRep.countByConfirmStatus(true);
+	}
+
+	public void updateDoctor(Doctor updatedDoctor) {
+	    Doctor existingDoctor = findById(updatedDoctor.getDoctorId());
+	    if (existingDoctor != null) {
+	        existingDoctor.setName(updatedDoctor.getName());
+	        existingDoctor.setAge(updatedDoctor.getAge());
+	        existingDoctor.setEmail(updatedDoctor.getEmail());
+	        existingDoctor.setAddress(updatedDoctor.getAddress());
+	        existingDoctor.setPhNumber(updatedDoctor.getPhNumber());
+	        existingDoctor.setSpecialization(updatedDoctor.getSpecialization());
+	        existingDoctor.setQualification(updatedDoctor.getQualification());
+	        existingDoctor.setExperienceYear(updatedDoctor.getExperienceYear());
+	        doctorRep.save(existingDoctor);
+	    }
+	}
+
+	public void save(Doctor doctor) {
+		doctorRep.save(doctor);
+	}
+
+	public List<Doctor> searchDoctorsByName(String searchTerm) {
+		return doctorRep.findByNameContainingIgnoreCaseAndConfirmStatus(searchTerm,true);
+	}
+	
+}
