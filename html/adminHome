@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard - City Star Clinic</title>
+    <link rel="stylesheet" th:href="@{/css/adminhome.css}"/>
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.6.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-...hash..." crossorigin="anonymous" referrerpolicy="no-referrer" />    
+</head>
+<body>
+    <div class="topbar">
+        <img th:src="@{/images/city1.png}" alt="City Star Logo" class="logo" width="150" height="50"> 
+         <div class="topbar-right">
+       		<i class="fa-solid fa-circle-user profile-icon" onclick="openProfileModal()" style="color: #3a8250;"></i>
+   		</div>     
+    </div>
+
+    <div class="container">
+        <div class="sidebar">
+            <ul>
+                <li><a th:href="@{/admin/home}"><i class="fa-solid fa-house-chimney-medical" style="color: #428566;"></i>Home</a></li>
+                <li><a th:href="@{/admin/viewDoctorRequests}"><i class="fa-solid fa-envelope" style="color: #428566;"></i>Requests</a></li>
+                <li><a th:href="@{/admin/viewDoctors}"><i class="fa-solid fa-user-doctor" style="color: #428566;"></i>Doctors</a></li>
+                <li><a th:href="@{/admin/viewPatients}"><i class="fa-solid fa-hospital-user" style="color: #428566;"></i>Patients</a></li>
+                <li><a th:href="@{/admin/viewAppointments}"><i class="fa-solid fa-calendar-check" style="color: #428566;"></i>Appointments</a></li>
+                <li><a th:href="@{/admin/logout}"><i class="fa-solid fa-right-from-bracket" style="color: #428566;"></i>Logout</a></li>
+            </ul>
+        </div>
+
+    <div class="main-content">
+    <div class="stats">
+        <!-- Patients Card -->
+        <div class="card patient-card">
+            <div class="card-icon">
+                <i class="fas fa-hospital-user"></i>
+            </div>
+            <div class="card-content">
+                <h3 th:text="${totalPatients}">0</h3>
+                <p>Patients</p>
+            </div>
+        </div>
+        
+        <!-- Doctors Card -->
+        <div class="card doctor-card">
+            <div class="card-icon">
+                <i class="fas fa-user-doctor"></i>
+            </div>
+            <div class="card-content">
+                <h3 th:text="${totalDoctors}">0</h3>
+                <p>Doctors</p>
+            </div>
+        </div>
+        
+        <!-- Appointments Card -->
+        <div class="card appointment-card">
+            <div class="card-icon">
+                <i class="fas fa-calendar-check"></i>
+            </div>
+            <div class="card-content">
+                <h3 th:text="${totalAppointments}">0</h3>
+                <p>Appointments</p>
+            </div>
+        </div>
+        
+        <div class="card income-card">
+            <div class="card-icon">
+                <i class="fas fa-money-bill-trend-up"></i>
+            </div>
+            <div class="card-content">
+                <h3>$5784</h3>
+                <p>Monthly Income</p>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+    
+    <div id="profile-modal" class="modal" style="display:none;">
+    <div class="modal-content">
+        <span class="close" onclick="closeProfileModal()">&times;</span>
+        <h2 style="text-align: center;color:#428566;">My Profile</h2>
+        <form th:action="@{/admin/updateProfile}" method="post">
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" th:value="${loggedInAdmin.name}" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" th:value="${loggedInAdmin.email}" required>
+            </div>
+            <div class="form-group">
+                <label for="phoneNumber">Phone Number:</label>
+                <input type="text" id="phoneNumber" name="phoneNumber" th:value="${loggedInAdmin.phoneNumber}" required>
+            </div>
+            <button type="submit" class="update-btn">Update</button>
+      </form>
+      </div>
+      </div>
+<script>
+    const profileIcon = document.querySelector('.profile-icon');
+    const modal = document.getElementById('profileModal');
+
+    profileIcon.addEventListener('click', () => {
+        modal.style.display = 'flex';
+    });
+
+    function openProfileModal() {
+        document.getElementById('profile-modal').style.display = 'block';
+    }
+    
+    function closeProfileModal() {
+    	 document.getElementById('profile-modal').style.display = 'none';
+    }
+
+    // Close modal on outside click
+    window.onclick = function(event) {
+        if (event.target === modal) {
+            closeModal();
+        }
+    }
+</script>
+</body>
+</html>
